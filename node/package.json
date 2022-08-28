@@ -1,0 +1,25 @@
+{
+	"name": "mortgage_interest_rates_app",
+	"version": "1.0.0",
+	"description": "Node.js on Docker",
+	"author": "Garrett Sens",
+	"main": "src/index.js",
+	"engines": {
+		"node": "10.x"
+	},
+	"scripts": {
+		"development2": "nodemon -L --inspect=0.0.0.0 src/index.js",
+		"development": "nodemon -L --inspect=0.0.0.0 ./src/index.js",
+		"dev": "npm run development"
+	},
+	"dependencies": {
+		"express": "^4.17.1",
+		"hbs": "^4.0.4",
+		"nodemon": "^2.0",
+		"bcryptjs": "^2.4.3",
+		"ejs": "^3.1.6",
+		"mongoose": "^6.0.3",
+		"passport": "^0.6",
+		"passport-local": "^1.0.0"
+	}
+}
