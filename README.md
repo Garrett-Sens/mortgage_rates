@@ -1,2 +1,2 @@
 # mortgage_rates
-Sends alerts regarding mortgage interest rates
+In development. Will send alerts regarding mortgage interest rates.
