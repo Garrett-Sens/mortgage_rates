@@ -14,6 +14,9 @@
 const express = require( 'express' );
 const path = require( 'path' ); // file paths
 const hbs = require( 'hbs' );
+const dotenv = require('dotenv').config();
+const fredData = require('./fred');
+
 
 // Constants
 // const PORT = 8080;
@@ -21,6 +24,7 @@ const hbs = require( 'hbs' );
 // const HOST = '0.0.0.0';
 const ENV = process.env.ENV = process.env.NODE_ENV = 'development';
 const HOST = process.env.HOST || '0.0.0.0';
+// const PORT = process.env.PORT || 8080;
 const PORT = process.env.PORT || 8080;
 
 // App
@@ -30,7 +34,6 @@ const pathPublicDirectory = path.join( __dirname, '../public' );
 const pathViews = path.join( __dirname, '../views' );
 const pathPartials = path.join( __dirname, '../views/partials' );
 
-console.log( pathPublicDirectory, pathViews, pathPartials );
 
 app.set( 'view engine', 'hbs' ); // point express to handlebars, a templating engine
 // app.set( 'views', pathViews ); // if you don't want to name your templates directory the default "views", then you have to add this line
@@ -44,27 +47,23 @@ app.get( '/', function( req, res )
 		res.render(
 			'home', // web_server/views/home.hbs
 			{
-				title: 'Home',
+				fred_key: process.env.FRED_KEY,
+				title: 'Home'
 				// name: 'Garrett Sens'
+				
 			}
 		); 
 	}
 );
 
-app.get('/test', (req, res) => {
-	res.send('Hello World');
-});
+// app.get('/test', (req, res) => {
+// 	res.send('Hello World');
+// });
 
-app.get( '/demo', function( req, res )
+// static html page. does not use Handlebars view engine from line 36
+app.get( '/static', function( req, res )
 	{
-		// res.sendFile('test.html');
-		res.render(
-			'demo',
-			{
-				// title: 'Home',
-				// name: 'Garrett Sens'
-			}
-		); 
+		res.sendFile(pathViews + '/static.html'); 
 	}
 );
 

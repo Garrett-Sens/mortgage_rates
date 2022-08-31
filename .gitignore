@@ -102,3 +102,11 @@ dist
 
 # TernJS port file
 .tern-port
+
+
+#
+# added by Garrett
+#
+
+# hide instructions on how to run the app
+instructions.txt
