@@ -9,14 +9,16 @@
 // if you don't want to stop and restart it every time you make changes
 // the "-e js, hbs" part tells nodemon to restart every time a file with those extensions is saved
 
+
+// console.logs from this file are shown in terminal, not browser
+
 'use strict';
 
 const express = require( 'express' );
 const path = require( 'path' ); // file paths
-const hbs = require( 'hbs' );
+const hbs = require( 'express-hbs' );
 const dotenv = require('dotenv').config();
-const fredData = require('./fred');
-
+const fredData = require('./fred'); // local "fred.js" file
 
 // Constants
 // const PORT = 8080;
@@ -32,25 +34,33 @@ const app = express();
 
 const pathPublicDirectory = path.join( __dirname, '../public' );
 const pathViews = path.join( __dirname, '../views' );
+const pathLayouts = path.join( __dirname, '../views/layouts' );
 const pathPartials = path.join( __dirname, '../views/partials' );
 
+console.log( pathLayouts );
 
+app.set( 'views', pathViews ); // if you don't want to name your templates directory the default "views", then you have to add this line
 app.set( 'view engine', 'hbs' ); // point express to handlebars, a templating engine
-// app.set( 'views', pathViews ); // if you don't want to name your templates directory the default "views", then you have to add this line
-app.use( express.static( pathPublicDirectory ) ); // this makes the public directory the web root. all pages inside public can now be accessed from the root url
+app.engine('hbs', hbs.express4({
+	// extname: '.hbs',
+	defaultLayout: pathLayouts + '/layout.hbs',
+	layoutsDir: pathLayouts,
+	partialsDir: pathPartials
+}));
 
-hbs.registerPartials( pathPartials ); // point hbs to partials dir
+app.use( express.static( pathPublicDirectory ) ); // this makes the public directory the web root. all pages inside public can now be accessed from the root url
+// hbs.registerPartials( pathPartials ); // point hbs to partials dir
 
 // home page
 app.get( '/', function( req, res )
 	{
 		res.render(
-			'home', // web_server/views/home.hbs
+			'layouts/layout.hbs', // web_server/views/home.hbs
 			{
 				fred_key: process.env.FRED_KEY,
-				title: 'Home'
+				title: 'Home',
+				bodyPartial: 'home'
 				// name: 'Garrett Sens'
-				
 			}
 		); 
 	}

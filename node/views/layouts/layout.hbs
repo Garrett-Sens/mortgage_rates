@@ -9,17 +9,12 @@
 	<body>
 		<div class='main-content'>
 			{{>header}} <!-- this is a partial -->
-			<form>
-				<input type='text' placeholder='Location'>
-				<button type='submit'>Search</button>
-			</form>
-			<p id='message-1'></p>
-			<p id='message-2'></p>
+			{{> (lookup . 'bodyPartial') }} <!-- this is a partial -->
 		</div>
 		{{>footer}}
 		{{!-- <script type='text/javascript' src='/js/app.js'></script> --}}
-		<script type='text/javascript'>
+		{{!-- <script type='text/javascript'>
 			
-		</script>
+		</script> --}}
 	</body>
 </html>
