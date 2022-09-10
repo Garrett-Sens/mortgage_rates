@@ -3,12 +3,12 @@
 	"version": "1.0.0",
 	"description": "Node.js on Docker",
 	"author": "Garrett Sens",
-	"main": "src/index.js",
+	"main": "src/app.js",
 	"engines": {
 		"node": "10.x"
 	},
 	"scripts": {
-		"development": "nodemon -L --inspect=0.0.0.0 ./src/index.js",
+		"development": "nodemon -L --inspect=0.0.0.0 ./src/app.js",
 		"dev": "npm run development"
 	},
 	"dependencies": {

@@ -51,31 +51,11 @@ app.engine('hbs', hbs.express4({
 app.use( express.static( pathPublicDirectory ) ); // this makes the public directory the web root. all pages inside public can now be accessed from the root url
 // hbs.registerPartials( pathPartials ); // point hbs to partials dir
 
-// home page
-app.get( '/', function( req, res )
-	{
-		res.render(
-			'layouts/layout.hbs', // web_server/views/home.hbs
-			{
-				fred_key: process.env.FRED_KEY,
-				title: 'Home',
-				bodyPartial: 'home'
-				// name: 'Garrett Sens'
-			}
-		); 
-	}
-);
-
-// app.get('/test', (req, res) => {
-// 	res.send('Hello World');
-// });
-
-// static html page. does not use Handlebars view engine from line 36
-app.get( '/static', function( req, res )
-	{
-		res.sendFile(pathViews + '/static.html'); 
-	}
-);
+const indexRouter = require('../routes/index');
+const ratesRouter = require('../routes/rates');
+// …
+app.use('/', indexRouter);
+app.use('/rates', ratesRouter);
 
 app.get( '*', function( req, res ) // match anything that hasn't been matched so far
 	{
