@@ -1,3 +1,6 @@
+// docker run -p 80:8080 -d --name node-dev -itv "/home/garrett/programming/mortgage_rates/node:/usr/src/app" --network network-dev garrettsens/mortgage 
+// docker run -d -p 27017:27017 --name mongo-dev --network network-dev mongo:latest
+
 // to run the server, run 
 
 	// node src/app.js
@@ -17,19 +20,30 @@
 const express = require( 'express' );
 const path = require( 'path' ); // file paths
 const hbs = require( 'express-hbs' );
+const mongoose = require('mongoose');
 const dotenv = require('dotenv').config();
 const fredData = require('./fred'); // local "fred.js" file
 
-// Constants
-// const PORT = 8080;
-// const PORT = process.env.PORT || 8080;
-// const HOST = '0.0.0.0';
 const ENV = process.env.ENV = process.env.NODE_ENV = 'development';
-const HOST = process.env.HOST || '0.0.0.0';
-// const PORT = process.env.PORT || 8080;
-const PORT = process.env.PORT || 8080;
+
+// Database
+// const DB_HOST = process.env.DB_HOST || '0.0.0.0';
+const DB_HOST = process.env.DB_HOST || 'mongo-dev';
+// const APP_PORT = process.env.APP_PORT || 8080;
+const DB_PORT = process.env.DB_PORT || 27017;
+const DB_URL = `${DB_HOST}:${DB_PORT}`;
+console.log( DB_URL );
+mongoose.connect(DB_URL, {useNewUrlParser: true, useUnifiedTopology: true}); //Set up default mongoose connection
+const db = mongoose.connection; //Get the default connection
+db.on('error', console.error.bind(console, 'MongoDB connection error:')); //Bind connection to error event (to get notification of connection errors)
 
 // App
+// const APP_PORT = 8080;
+// const APP_PORT = process.env.APP_PORT || 8080;
+// const APP_HOST = '0.0.0.0';
+const APP_HOST = process.env.APP_HOST || '0.0.0.0';
+// const APP_PORT = process.env.APP_PORT || 8080;
+const APP_PORT = process.env.APP_PORT || 8080;
 const app = express();
 
 const pathPublicDirectory = path.join( __dirname, '../public' );
@@ -70,13 +84,12 @@ app.get( '*', function( req, res ) // match anything that hasn't been matched so
 	}
 );
 
-app.listen(PORT, HOST, function(error)
+app.listen(APP_PORT, APP_HOST, function(error)
 {
 	if(error)
 	{
 		console.error(error);
 	}
 
-	console.log(`Running on http://${HOST}:${PORT}`); // console.log output appears in terminal after running "npm run dev"
+	console.log(`Running on http://${APP_HOST}:${APP_PORT}`); // console.log output appears in terminal after running "npm run dev"
 });
-

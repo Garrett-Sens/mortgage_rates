@@ -2,6 +2,7 @@ const Rate = require('../models/rate');
 
 // Display list of all Rates.
 exports.rate_list = (req, res) => {
+	// let rates = Rate::getAll();
 	res.send('NOT IMPLEMENTED: Rate list');
 };
 
