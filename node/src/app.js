@@ -22,7 +22,8 @@ const path = require( 'path' ); // file paths
 const hbs = require( 'express-hbs' );
 const mongoose = require('mongoose');
 const dotenv = require('dotenv').config();
-const fredData = require('./fred'); // local "fred.js" file
+require('./sync-categories');
+require('./console-override.js');
 
 const ENV = process.env.ENV = process.env.NODE_ENV = 'development';
 
@@ -32,8 +33,8 @@ const DB_HOST = process.env.DB_HOST || 'mongo-dev';
 // const APP_PORT = process.env.APP_PORT || 8080;
 const DB_PORT = process.env.DB_PORT || 27017;
 const DB_URL = `${DB_HOST}:${DB_PORT}`;
-console.log( DB_URL );
-mongoose.connect(DB_URL, {useNewUrlParser: true, useUnifiedTopology: true}); //Set up default mongoose connection
+// console.log( DB_URL );
+mongoose.connect('mongodb://' + DB_URL, {useNewUrlParser: true, useUnifiedTopology: true}); //Set up default mongoose connection
 const db = mongoose.connection; //Get the default connection
 db.on('error', console.error.bind(console, 'MongoDB connection error:')); //Bind connection to error event (to get notification of connection errors)
 
@@ -50,8 +51,7 @@ const pathPublicDirectory = path.join( __dirname, '../public' );
 const pathViews = path.join( __dirname, '../views' );
 const pathLayouts = path.join( __dirname, '../views/layouts' );
 const pathPartials = path.join( __dirname, '../views/partials' );
-
-console.log( pathLayouts );
+// console.log( pathLayouts );
 
 app.set( 'views', pathViews ); // if you don't want to name your templates directory the default "views", then you have to add this line
 app.set( 'view engine', 'hbs' ); // point express to handlebars, a templating engine
@@ -67,20 +67,24 @@ app.use( express.static( pathPublicDirectory ) ); // this makes the public direc
 
 const indexRouter = require('../routes/index');
 const ratesRouter = require('../routes/rates');
+const categoriesRouter = require('../routes/categories');
 // …
 app.use('/', indexRouter);
 app.use('/rates', ratesRouter);
+app.use('/categories', categoriesRouter);
 
 app.get( '*', function( req, res ) // match anything that hasn't been matched so far
 	{
-		res.render(
-			'404',
-			{
-				title: '404',
-				// name: 'Garrett Sens',
-				errorMessage: 'Page not found'
-			}
-		);
+		// res.render(
+		// 	'404',
+		// 	{
+		// 		title: '404',
+		// 		// name: 'Garrett Sens',
+		// 		errorMessage: 'Page not found'
+		// 	}
+		// );
+		// console.log( req );
+		res.send( "404 Page not found" );
 	}
 );
 

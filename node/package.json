@@ -8,7 +8,7 @@
 		"node": "10.x"
 	},
 	"scripts": {
-		"development": "nodemon -L --inspect=0.0.0.0 ./src/app.js",
+		"development": "nodemon -L --inspect=0.0.0.0:9229 ./src/app.js",
 		"dev": "npm run development"
 	},
 	"dependencies": {
@@ -18,7 +18,7 @@
 		"express": "^4.17.1",
 		"express-hbs": "^2.4.0",
 		"fred-api": "^2.0.1",
-		"hbs": "^4.0.4",
+		"hbs": "^4.2.0",
 		"mongoose": "^5.13.15",
 		"nodemon": "^2.0",
 		"passport": "^0.6",

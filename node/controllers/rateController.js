@@ -3,7 +3,14 @@ const Rate = require('../models/rate');
 // Display list of all Rates.
 exports.rate_list = (req, res) => {
 	// let rates = Rate::getAll();
-	res.send('NOT IMPLEMENTED: Rate list');
+	// res.send('NOT IMPLEMENTED: Rate list');
+	res.render(
+		'layouts/layout',
+		{
+			title: 'Rates',
+			bodyPartial: 'home',
+		}
+	);
 };
 
 // Display detail page for a specific Rate.
