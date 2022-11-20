@@ -40,6 +40,8 @@ Category.find((err, categories) => {
 	categories.forEach(category => {
 		fred.getCategory({id : category.id}, function(error, result){
 			console.log( categories );
+
+			// delete categories from mongodb that are no longer in FRED
 			if( !result.categories )
 			{
 				Category.deleteOne({id: category.id});

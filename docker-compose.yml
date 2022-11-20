@@ -1,0 +1,47 @@
+# docker run -p 80:8080 -p 9229:9229 -d --name node-dev -itv "/home/garrett/programming/mortgage_rates/node:/usr/src/app" --network network-dev garrettsens/mortgage 
+# docker run -d -p 27017:27017 --name mongo-dev --network network-dev mongo:latest
+
+# documentation: https://docs.docker.com/compose/compose-file/compose-file-v2/
+version: '2.0'
+services:
+    node:
+        container_name: node-dev
+        build:
+            context: ./node
+            dockerfile: Dockerfile
+        image: garrettsens/mortgage #Specify the image to run the container from. Can either be a repository/tag or a partial image ID. If you include a "build" setting, then Docker Compose will use the "image" string as the name of the image it builds. If not, then it will download the "image" tag from dockerhub and use it. https://stackoverflow.com/questions/34316047/difference-between-image-and-build-within-docker-compose
+        ports:
+            - "80:8080" #what port the outside sees it as : what the container sees it as
+            - "9229:9229"
+        volumes:
+            - "/home/garrett/programming/mortgage_rates/node:/usr/src/app"
+            # - "./laravel/mentor_app:/var/www/html"
+            # - "./laravel/logs:/var/log/apache2"
+        # networks: # a shared network with the name "mortgage_rates_default" is automatically created by docker compose
+        #     - network-dev
+        depends_on:
+            - "mongodb"
+        stdin_open: true
+        tty: true
+        # environment:
+        #     - POSTGRES_HOSTNAME=db
+        #     - LARAVEL_ROOT=/var/www/html
+        # extra_hosts: 
+        #     - "smtp.utah.edu:155.97.137.42"
+    mongodb:
+        container_name: mongo-dev
+        build:
+            context: ./mongodb
+            dockerfile: Dockerfile
+        image: mongo
+        volumes:
+            - "db-data:/data/db/"
+        ports:
+            - "27017:27017"
+        # networks:
+            # - network-dev
+        stdin_open: true
+        tty: true
+
+volumes:
+    db-data:
