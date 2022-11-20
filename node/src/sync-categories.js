@@ -1,6 +1,8 @@
 const fred = require('./fred'); // local "fred.js" file
 const Category = require('../models/category');
 
+// these run simultaneously
+
 // get all categories from FRED
 fred.getCategory({}, function(error, result){
 	console.log( 'FRED Category' );
@@ -12,7 +14,7 @@ fred.getCategory({}, function(error, result){
 			console.log( matches );
 
 			// insert missing categories from fred into mongo database
-			if( !matches )
+			if( !matches.length )
 			{
 				Category.create({
 					id: category.id,
@@ -42,7 +44,7 @@ Category.find((err, categories) => {
 			console.log( categories );
 
 			// delete categories from mongodb that are no longer in FRED
-			if( !result.categories )
+			if( !result.categories.length )
 			{
 				Category.deleteOne({id: category.id});
 			}

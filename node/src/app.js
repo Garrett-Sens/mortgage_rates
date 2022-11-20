@@ -12,8 +12,11 @@
 // if you don't want to stop and restart it every time you make changes
 // the "-e js, hbs" part tells nodemon to restart every time a file with those extensions is saved
 
-
 // console.logs from this file are shown in terminal, not browser
+
+// 
+// LIBRARIES
+// 
 
 'use strict';
 
@@ -22,12 +25,18 @@ const path = require( 'path' ); // file paths
 const hbs = require( 'express-hbs' );
 const mongoose = require('mongoose');
 const dotenv = require('dotenv').config();
-require('./sync-categories');
-require('./console-override.js');
+require('./console-override.js'); // adds file and line number to console output
+
+// 
+// ENVIRONMENT
+// 
 
 const ENV = process.env.ENV = process.env.NODE_ENV = 'development';
 
-// Database
+// 
+// DATABASE
+// 
+
 // const DB_HOST = process.env.DB_HOST || '0.0.0.0';
 const DB_HOST = process.env.DB_HOST || 'mongo-dev';
 // const APP_PORT = process.env.APP_PORT || 8080;
@@ -38,7 +47,16 @@ mongoose.connect('mongodb://' + DB_URL, {useNewUrlParser: true, useUnifiedTopolo
 const db = mongoose.connection; //Get the default connection
 db.on('error', console.error.bind(console, 'MongoDB connection error:')); //Bind connection to error event (to get notification of connection errors)
 
-// App
+//
+// FRED API
+//
+
+require('./sync-categories'); // syncs FRED categories with mongo db
+
+// 
+// APP
+// 
+
 // const APP_PORT = 8080;
 // const APP_PORT = process.env.APP_PORT || 8080;
 // const APP_HOST = '0.0.0.0';
@@ -65,6 +83,10 @@ app.engine('hbs', hbs.express4({
 app.use( express.static( pathPublicDirectory ) ); // this makes the public directory the web root. all pages inside public can now be accessed from the root url
 // hbs.registerPartials( pathPartials ); // point hbs to partials dir
 
+// 
+// ROUTES 
+// 
+
 const indexRouter = require('../routes/index');
 const ratesRouter = require('../routes/rates');
 const categoriesRouter = require('../routes/categories');
@@ -87,6 +109,10 @@ app.get( '*', function( req, res ) // match anything that hasn't been matched so
 		res.send( "404 Page not found" );
 	}
 );
+
+// 
+// SERVE 
+// 
 
 app.listen(APP_PORT, APP_HOST, function(error)
 {
