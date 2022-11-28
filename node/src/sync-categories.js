@@ -38,12 +38,12 @@ Category.find((err, categories) => {
 	if (err) return handleError(err);
 	console.log( categories );
 
-	// check if FRED still has that category
 	categories.forEach(category => {
+		// check if FRED still has that category
 		fred.getCategory({id : category.id}, function(error, result){
-			console.log( categories );
+			console.log( result.categories );
 
-			// delete categories from mongodb that are no longer in FRED
+			// delete category from mongodb that is no longer in FRED
 			if( !result.categories.length )
 			{
 				Category.deleteOne({id: category.id});

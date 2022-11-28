@@ -51,7 +51,26 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:')); //Bind
 // FRED API
 //
 
-require('./sync-categories'); // syncs FRED categories with mongo db
+require('./sync'); // syncs FRED categories with mongo db
+
+const fred = require('./fred'); // local "fred.js" file
+const Category = require('../models/category');
+const Sync = require('./sync');
+
+let categorySync = new Sync(Category);
+
+// get all categories from FRED
+fred.getCategory({}, function(error, result){
+	console.log( 'FRED Category' );
+	console.log( result );
+	// sync FRED categories with Mongodb
+	categorySync.apiWithDatabase(result.categories);
+});
+
+Category.find((err, categories) => {
+	console.log( result.categories );
+	categorySync.databaseWithApi(result.categories);
+});
 
 // 
 // APP
