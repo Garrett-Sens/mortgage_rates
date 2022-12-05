@@ -1,15 +1,17 @@
 /**
  * @class Sync
  * @constructor
+ * @param {Object} fred An instance of the fred-api class
  * @param {Object} Model The Mongoose schema
  */
-Sync = function(Model) {
+Sync = function(fred, Model) {
     'use strict';
     this.Model = Model;
+	this.fred = fred;
 };
 
 // get all models from FRED
-Sync.prototype.apiWithDatabase = function( apiModels )
+Sync.prototype.apiWithDatabase = function(apiModels)
 {
 	apiModels.forEach(apiModel => {
 		// search mongodb for model with the same id
@@ -34,7 +36,7 @@ Sync.prototype.apiWithDatabase = function( apiModels )
 }
 
 // get all models from mongodb
-Sync.prototype.databaseWithApi = function( databaseModels )
+Sync.prototype.databaseWithApi = function(databaseModels)
 {
 	this.Model.find((err, apiModels) => {
 		if (err) return handleError(err);
@@ -42,13 +44,13 @@ Sync.prototype.databaseWithApi = function( databaseModels )
 
 		databaseModels.forEach(databaseModel => {
 			// check if FRED still has that model
-			fred.getCategory({id : model.id}, function(error, result){
-				console.log( result.categories );
+			this.fred.getCategory({id : databaseModel.id}, function(error, result){
+				console.log(result.categories); // @todo how to genericize? 
 
 				// delete model from mongodb that is no longer in FRED
 				if( !result.categories.length )
 				{
-					this.Model.deleteOne({id: model.id});
+					this.Model.deleteOne({id: databaseModel.id});
 				}
 			});
 		});

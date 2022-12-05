@@ -1,4 +1,4 @@
-// docker run -p 80:8080 -d --name node-dev -itv "/home/garrett/programming/mortgage_rates/node:/usr/src/app" --network network-dev garrettsens/mortgage 
+// docker run -p 80:8080 -d --name node-dev -itv "/home/garrett/programming/mortgage_releases/node:/usr/src/app" --network network-dev garrettsens/mortgage 
 // docker run -d -p 27017:27017 --name mongo-dev --network network-dev mongo:latest
 
 // to run the server, run 
@@ -51,25 +51,53 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:')); //Bind
 // FRED API
 //
 
+// require('./sync-categories.js');
+
 require('./sync'); // syncs FRED categories with mongo db
 
 const fred = require('./fred'); // local "fred.js" file
-const Category = require('../models/category');
 const Sync = require('./sync');
 
-let categorySync = new Sync(Category);
+//
+// sync Categories
+//
+
+const Category = require('../models/category');
+let categorySync = new Sync(fred, Category);
 
 // get all categories from FRED
 fred.getCategory({}, function(error, result){
-	console.log( 'FRED Category' );
-	console.log( result );
+	console.log('FRED Category');
+	console.log(result);
 	// sync FRED categories with Mongodb
 	categorySync.apiWithDatabase(result.categories);
 });
 
+// get all categories from database
 Category.find((err, categories) => {
-	console.log( result.categories );
-	categorySync.databaseWithApi(result.categories);
+	console.log(categories);
+	categorySync.databaseWithApi(categories);
+});
+
+//
+// sync Releases
+//
+
+const Release = require('../models/release');
+let releaseSync = new Sync(fred, Release);
+
+// get all releases from FRED
+fred.getReleases({}, function(error, result){
+	console.log('FRED Release');
+	console.log(result);
+	// sync FRED releases with Mongodb
+	releaseSync.apiWithDatabase(result.releases);
+});
+
+// get all releases from database
+Release.find((err, releases) => {
+	console.log(releases);
+	releaseSync.databaseWithApi(releases);
 });
 
 // 
@@ -90,8 +118,8 @@ const pathLayouts = path.join( __dirname, '../views/layouts' );
 const pathPartials = path.join( __dirname, '../views/partials' );
 // console.log( pathLayouts );
 
-app.set( 'views', pathViews ); // if you don't want to name your templates directory the default "views", then you have to add this line
-app.set( 'view engine', 'hbs' ); // point express to handlebars, a templating engine
+app.set('views', pathViews); // if you don't want to name your templates directory the default "views", then you have to add this line
+app.set('view engine', 'hbs'); // point express to handlebars, a templating engine
 app.engine('hbs', hbs.express4({
 	// extname: '.hbs',
 	defaultLayout: pathLayouts + '/layout.hbs',
@@ -107,11 +135,11 @@ app.use( express.static( pathPublicDirectory ) ); // this makes the public direc
 // 
 
 const indexRouter = require('../routes/index');
-const ratesRouter = require('../routes/rates');
+const releasesRouter = require('../routes/releases');
 const categoriesRouter = require('../routes/categories');
 // …
 app.use('/', indexRouter);
-app.use('/rates', ratesRouter);
+app.use('/releases', releasesRouter);
 app.use('/categories', categoriesRouter);
 
 app.get( '*', function( req, res ) // match anything that hasn't been matched so far
