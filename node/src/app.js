@@ -63,42 +63,43 @@ const Sync = require('./sync');
 //
 
 const Category = require('../models/category');
-let categorySync = new Sync(fred, Category);
+let categorySync = new Sync(fred, Category, 'getCategory', 'categories');
+categorySync.sync();
 
-// get all categories from FRED
-fred.getCategory({}, function(error, result){
-	console.log('FRED Category');
-	console.log(result);
-	// sync FRED categories with Mongodb
-	categorySync.apiWithDatabase(result.categories);
-});
+// // get all categories from FRED
+// fred.getCategory({}, function(error, result){
+// 	// console.log('FRED Category');
+// 	// console.log(result);
+// 	// sync FRED categories with Mongodb
+// 	categorySync.apiWithDatabase(result.categories);
+// });
 
-// get all categories from database
-Category.find((err, categories) => {
-	console.log(categories);
-	categorySync.databaseWithApi(categories);
-});
+// // get all categories from database
+// Category.find((err, categories) => {
+// 	// console.log(categories);
+// 	categorySync.databaseWithApi(categories);
+// });
 
 //
 // sync Releases
 //
 
-const Release = require('../models/release');
-let releaseSync = new Sync(fred, Release);
+// const Release = require('../models/release');
+// let releaseSync = new Sync(fred, Release, 'releases');
 
-// get all releases from FRED
-fred.getReleases({}, function(error, result){
-	console.log('FRED Release');
-	console.log(result);
-	// sync FRED releases with Mongodb
-	releaseSync.apiWithDatabase(result.releases);
-});
+// // get all releases from FRED
+// fred.getReleases({}, function(error, result){
+// 	// console.log('FRED Release');
+// 	// console.log(result);
+// 	// sync FRED releases with Mongodb
+// 	releaseSync.apiWithDatabase(result.releases);
+// });
 
-// get all releases from database
-Release.find((err, releases) => {
-	console.log(releases);
-	releaseSync.databaseWithApi(releases);
-});
+// // get all releases from database
+// Release.find((err, releases) => {
+// 	// console.log(releases);
+// 	releaseSync.databaseWithApi(releases);
+// });
 
 // 
 // APP

@@ -1,5 +1,16 @@
 const Fred = require('fred-api');
+
+if( !process.env.FRED_KEY )
+{
+	throw new Error( "Missing FRED API key" );
+}
+
 const fred = new Fred(process.env.FRED_KEY);
+
+if( !fred )
+{
+	throw new Error( "Not able to connect to FRED API" );
+}
 
 // const mongoose = require('mongoose');
 // const Category = require('../models/category');

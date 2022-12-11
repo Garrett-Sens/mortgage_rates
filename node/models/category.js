@@ -20,7 +20,7 @@ const CategorySchema = new Schema({
     	// default: Date.now,
     	// default: "Maintenance",
 	},
-	parentId: {
+	parent_id: {
 		type: Number,
 		required: true
 	},

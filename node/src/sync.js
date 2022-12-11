@@ -4,56 +4,130 @@
  * @param {Object} fred An instance of the fred-api class
  * @param {Object} Model The Mongoose schema
  */
-Sync = function(fred, Model) {
+Sync = function(fred, Model, fredMethodName, endpoint)
+{
     'use strict';
     this.Model = Model;
 	this.fred = fred;
+	this.fredMethodName = fredMethodName;
+	this.endpoint = endpoint;
 };
 
-// get all models from FRED
-Sync.prototype.apiWithDatabase = function(apiModels)
+// get data for this model from FRED API
+Sync.prototype.getApiData = function()
 {
-	apiModels.forEach(apiModel => {
-		// search mongodb for model with the same id
-		this.Model.find({id : apiModel.id}, (err, matches) => {
-			if (err) return handleError(err);
-			console.log( matches );
+	const fred = this.fred;
+	const fredMethodName = this.fredMethodName;
+	const endpoint = this.endpoint;
 
-			// insert missing models from fred into mongo database
-			if( !matches.length )
+	return new Promise(
+		function(resolve, reject)
+		{
+			fred[fredMethodName]({}, function(error, result){
+				if(error)
+				{
+					return reject(error);
+				}
+				return resolve(result[endpoint]);
+			});
+		}
+	);
+}
+
+// get database data for this model
+Sync.prototype.getDatabaseData = function()
+{
+	const Model = this.Model;
+
+	return new Promise(
+		function(resolve, reject)
+		{
+			Model.find((error, result) => {
+				if(error)
+				{
+					return reject(error);
+				}
+				return resolve(result);
+			});
+		}
+	);
+}
+
+Sync.prototype.getSyncData = function()
+{
+	return Promise.all(
+		[
+			this.getApiData(),
+			this.getDatabaseData()
+		]
+	).then(function(data, error)
+	{
+		if(error)
+		{
+			throw new Error(error);
+		}
+
+		return {
+			'api' : data[0],
+			'database' : data[1]
+		};
+	});
+}
+
+Sync.prototype.sync = function()
+{
+	this.getSyncData().then(function(data)
+	{
+		const apiData = data.api;
+		const databaseData = data.database;
+
+		console.log(apiData);
+		console.log(databaseData);
+
+		this.syncApiWithDatabase(apiData, databaseData);
+		this.syncDatabaseWithApi(databaseData, apiData);
+	});
+}
+
+Sync.prototype.syncApiWithDatabase = function(apiData, databaseData)
+{
+	const Model = this.Model;
+
+	apiData.forEach(apiModelData => {
+		databaseData.forEach(databaseModelData => {
+			if(apiModelData.id === databaseModelData.id)
 			{
-				this.Model.create(apiModel, function (err, apiModel) {
-					console.log( apiModel );
-					if(err)
-					{
-						console.error( err );
-					}
-					// saved!
-				});
+				return true;
 			}
+		});
+
+		// add new API model to database
+		Model.create(apiModelData, function(error, apiModel) {
+			// console.log( apiModel );
+			if(error)
+			{
+				throw new Error(error);
+			}
+			// saved!
 		});
 	});
 }
 
 // get all models from mongodb
-Sync.prototype.databaseWithApi = function(databaseModels)
+Sync.prototype.syncDatabaseWithApi = function(databaseData, apiData)
 {
-	this.Model.find((err, apiModels) => {
-		if (err) return handleError(err);
-		console.log( apiModels );
+	const Model = this.Model;
 
-		databaseModels.forEach(databaseModel => {
-			// check if FRED still has that model
-			this.fred.getCategory({id : databaseModel.id}, function(error, result){
-				console.log(result.categories); // @todo how to genericize? 
-
-				// delete model from mongodb that is no longer in FRED
-				if( !result.categories.length )
-				{
-					this.Model.deleteOne({id: databaseModel.id});
-				}
-			});
+	databaseData.forEach(databaseModelData => {
+		apiData.forEach(apiModelData => {
+			if(databaseModelData.id === apiModelData.id)
+			{
+				return true;
+			}
 		});
+
+		// delete model from mongodb that is no longer in FRED
+		Model.deleteOne({id: databaseModel.id});
 	});
 }
 
