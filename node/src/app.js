@@ -53,53 +53,33 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:')); //Bind
 
 // require('./sync-categories.js');
 
-require('./sync'); // syncs FRED categories with mongo db
+require('./fredCopy'); // syncs FRED categories with mongo db
 
 const fred = require('./fred'); // local "fred.js" file
-const Sync = require('./sync');
+const FredCopy = require('./fredCopy');
 
 //
 // sync Categories
 //
 
-const Category = require('../models/category');
-let categorySync = new Sync(fred, Category, 'getCategory', 'categories');
-categorySync.sync();
+// const Category = require('../models/category');
+// let categoryCopy = new FredCopy(Category, fred, fred.getCategory, 'categories');
+// categoryCopy.clear();
+// categoryCopy.sync();
 
-// // get all categories from FRED
-// fred.getCategory({}, function(error, result){
-// 	// console.log('FRED Category');
-// 	// console.log(result);
-// 	// sync FRED categories with Mongodb
-// 	categorySync.apiWithDatabase(result.categories);
-// });
-
-// // get all categories from database
-// Category.find((err, categories) => {
-// 	// console.log(categories);
-// 	categorySync.databaseWithApi(categories);
-// });
+const CategoryChild = require('../models/category_child');
+let categoryChildCopy = new FredCopy(CategoryChild, fred, fred.getCategoryChildren, 'categories');
+categoryChildCopy.clear();
+categoryChildCopy.sync();
 
 //
 // sync Releases
 //
 
 // const Release = require('../models/release');
-// let releaseSync = new Sync(fred, Release, 'releases');
-
-// // get all releases from FRED
-// fred.getReleases({}, function(error, result){
-// 	// console.log('FRED Release');
-// 	// console.log(result);
-// 	// sync FRED releases with Mongodb
-// 	releaseSync.apiWithDatabase(result.releases);
-// });
-
-// // get all releases from database
-// Release.find((err, releases) => {
-// 	// console.log(releases);
-// 	releaseSync.databaseWithApi(releases);
-// });
+// let releaseSync = new FredCopy(Release, fred, fred.getReleases, 'releases');
+// releaseSync.clear();
+// releaseSync.sync();
 
 // 
 // APP
@@ -138,6 +118,7 @@ app.use( express.static( pathPublicDirectory ) ); // this makes the public direc
 const indexRouter = require('../routes/index');
 const releasesRouter = require('../routes/releases');
 const categoriesRouter = require('../routes/categories');
+const { hasUncaughtExceptionCaptureCallback } = require('process');
 // …
 app.use('/', indexRouter);
 app.use('/releases', releasesRouter);

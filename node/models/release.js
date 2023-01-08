@@ -1,4 +1,3 @@
-// Require Mongoose
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
@@ -27,8 +26,8 @@ const ReleaseSchema = new Schema({
 	},
 	link: {
 		type: String,
-		required: true,
-		unique: true
+		required: false, // release id: 416 et al do not have links
+		unique: false // release id: 63 has duplicate link
 	}
 });
 
