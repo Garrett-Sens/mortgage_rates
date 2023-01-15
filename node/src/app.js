@@ -53,7 +53,11 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:')); //Bind
 
 // require('./sync-categories.js');
 
-require('./fredCopy'); // syncs FRED categories with mongo db
+//
+// FRED API
+//
+// require('./sync-categories.js');
+require('./fredCopy').default; // syncs FRED categories with mongo db
 
 const fred = require('./fred'); // local "fred.js" file
 const FredCopy = require('./fredCopy');
@@ -63,14 +67,21 @@ const FredCopy = require('./fredCopy');
 //
 
 // const Category = require('../models/category');
-// let categoryCopy = new FredCopy(Category, fred, fred.getCategory, 'categories');
+// let categoryCopy = new FredCopy(Category, fred, fred.getCategory, {}, 'categories');
 // categoryCopy.clear();
 // categoryCopy.sync();
 
-const CategoryChild = require('../models/category_child');
-let categoryChildCopy = new FredCopy(CategoryChild, fred, fred.getCategoryChildren, 'categories');
-categoryChildCopy.clear();
-categoryChildCopy.sync();
+// const CategoryChild = require('../models/category_child');
+// let categoryChildCopy = new FredCopy(CategoryChild, fred, fred.getCategoryChildren, 'categories');
+// categoryChildCopy.clear();
+// categoryChildCopy.sync();
+
+const Series = require('../models/series');
+let seriesCopy = new FredCopy(Series, fred, fred.getSeries, {
+	series_id: "MORTGAGE30US"
+}, 'series');
+seriesCopy.clear();
+seriesCopy.sync();
 
 //
 // sync Releases
