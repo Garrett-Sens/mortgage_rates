@@ -27,8 +27,8 @@ class FredCopy
 			// console.log(apiDataMap);
 			// console.log(databaseDataMap);
 
-			// scope.insertUpdateFredData(apiDataMap, databaseDataMap);
-			// scope.deleteOldFredData(apiDataMap, databaseDataMap);
+			scope.insertUpdateFredData(apiDataMap, databaseDataMap);
+			scope.deleteOldFredData(apiDataMap, databaseDataMap);
 		});
 	}
 
@@ -133,7 +133,7 @@ class FredCopy
 		const Model = this.Model;
 
 		// iterate over IDs in API data
-		for(apiDataId in apiDataMap)
+		for(const apiDataId in apiDataMap)
 		{
 			if(!apiDataMap.hasOwnProperty(apiDataId))
 			{

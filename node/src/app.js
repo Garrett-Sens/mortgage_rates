@@ -76,12 +76,18 @@ const FredCopy = require('./fredCopy');
 // categoryChildCopy.clear();
 // categoryChildCopy.sync();
 
-const Series = require('../models/series');
-let seriesCopy = new FredCopy(Series, fred, fred.getSeries, {
+// const Series = require('../models/series');
+// let seriesCopy = new FredCopy(Series, fred, fred.getSeries, {
+// 	series_id: "MORTGAGE30US"
+// }, 'seriess');
+// seriesCopy.sync();
+
+const SeriesObservation = require('../models/series_observation');
+let seriesObservationCopy = new FredCopy(SeriesObservation, fred, fred.getSeriesObservations, {
 	series_id: "MORTGAGE30US"
-}, 'series');
-seriesCopy.clear();
-seriesCopy.sync();
+}, 'observations');
+seriesObservationCopy.clear();
+seriesObservationCopy.sync();
 
 //
 // sync Releases
@@ -127,11 +133,15 @@ app.use( express.static( pathPublicDirectory ) ); // this makes the public direc
 // 
 
 const indexRouter = require('../routes/index');
+const seriesRouter = require('../routes/series');
+const seriesObservationsRouter = require('../routes/series_observations');
 const releasesRouter = require('../routes/releases');
 const categoriesRouter = require('../routes/categories');
 const { hasUncaughtExceptionCaptureCallback } = require('process');
 // …
 app.use('/', indexRouter);
+app.use('/series', seriesRouter);
+app.use('/series_observations', seriesObservationsRouter);
 app.use('/releases', releasesRouter);
 app.use('/categories', categoriesRouter);
 
