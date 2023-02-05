@@ -6,13 +6,14 @@
  */
 class FredCopy
 {
-	constructor(Model, fred, fredGetMethod, where = {}, endpoint)
+	constructor(Model, fred, fredGetMethod, where = {}, endpoint, primaryKey = 'id')
 	{
 		this.Model = Model;
 		this.fred = fred;
 		this.fredGetMethod = fredGetMethod;
 		this.where = where;
 		this.endpoint = endpoint;
+		this.primaryKey = primaryKey;
 	}
 
 	// sync api to database and database to api
@@ -25,7 +26,9 @@ class FredCopy
 			const databaseDataMap = data.database;
 
 			// console.log(apiDataMap);
-			// console.log(databaseDataMap);
+			console.log(Object.keys(apiDataMap).length);
+			// console.log(databaseDataMap.length);
+			console.log(Object.keys(databaseDataMap).length);
 
 			scope.insertUpdateFredData(apiDataMap, databaseDataMap);
 			scope.deleteOldFredData(apiDataMap, databaseDataMap);
@@ -60,11 +63,13 @@ class FredCopy
 	{
 		const apiDataMap = {};
 		const apiData = await this.getApiData(this.where);
-		console.log(apiData);
+		// console.log(apiData);
 		for(const apiModelData of apiData)
 		{
-			apiDataMap[apiModelData.id] = apiModelData;
+			// console.log(apiModelData)
+			apiDataMap[apiModelData[this.primaryKey]] = apiModelData;
 		}
+		// console.log(apiDataMap);
 		return apiDataMap;
 	}
 
@@ -78,7 +83,7 @@ class FredCopy
 			{
 				scope.fredGetMethod.call(scope.fred, where, function(error, result)
 				{
-					console.log(result);
+					// console.log(result);
 					if(error)
 					{
 						return reject(error);
@@ -102,7 +107,7 @@ class FredCopy
 		const databaseData = await this.getDatabaseData();
 		for(const databaseModelData of databaseData)
 		{
-			databaseDataMap[databaseModelData.id] = databaseModelData;
+			databaseDataMap[databaseModelData[this.primaryKey]] = databaseModelData;
 		}
 		return databaseDataMap;
 	}
@@ -181,7 +186,7 @@ class FredCopy
 		const Model = this.Model;
 
 		// iterate over IDs in database data
-		for(databaseModelId in databaseDataMap)
+		for(const databaseModelId in databaseDataMap)
 		{
 			if(!databaseDataMap.hasOwnProperty(databaseModelId))
 			{
@@ -200,7 +205,13 @@ class FredCopy
 	clear()
 	{
 		const Model = this.Model;
-		Model.deleteMany();
+		console.log(this.where);
+		Model.deleteMany(this.where).then(function(data){
+			console.log("Data deleted"); // Success
+			console.log(data);
+		}).catch(function(error){
+			console.log(error); // Failure
+		});
 	}
 
 	// delete Mongo db data that is no longer in FRED

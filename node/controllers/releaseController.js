@@ -5,10 +5,9 @@ exports.release_list = (req, res) => {
 	// let releases = Release::getAll();
 	// res.send('NOT IMPLEMENTED: Release list');
 	res.render(
-		'layouts/layout',
+		'resources',
 		{
-			title: 'Releases',
-			bodyPartial: 'home',
+			title: 'Releases'
 		}
 	);
 };

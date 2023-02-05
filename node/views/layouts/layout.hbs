@@ -4,16 +4,20 @@
 		<title>{{title}}</title>
 		{{!-- <link rel='icon' href='/img/weather.png'> --}}
 		<link rel='stylesheet' href='/css/styles.css'>
+		{{{block 'links'}}}
+		{{{block 'styles'}}}
 	</head>
 	<body>
 		<div class='main-content'>
 			{{>header}} <!-- this is a partial -->
-			{{>(lookup . 'bodyPartial')}} <!-- this is a partial -->
+			{{!-- {{>(lookup . 'bodyPartial')}} <!-- this is a partial --> --}}
+			{{{body}}}
 		</div>
 		{{>footer}}
 		{{!-- <script type='text/javascript' src='/js/app.js'></script> --}}
 		{{!-- <script type='text/javascript'>
 			
 		</script> --}}
+		{{{block 'scripts'}}}
 	</body>
 </html>

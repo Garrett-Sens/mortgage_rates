@@ -22,9 +22,10 @@
 
 const express = require( 'express' );
 const path = require( 'path' ); // file paths
-const hbs = require( 'express-hbs' );
+let hbs = require( 'express-hbs' );
 const mongoose = require('mongoose');
 const dotenv = require('dotenv').config();
+let extend = require('handlebars-extend-block');
 require('./console-override.js'); // adds file and line number to console output
 
 // 
@@ -82,12 +83,13 @@ const FredCopy = require('./fredCopy');
 // }, 'seriess');
 // seriesCopy.sync();
 
+// @todo there are supposed to be hundreds but only 20 show up?
 const SeriesObservation = require('../models/series_observation');
 let seriesObservationCopy = new FredCopy(SeriesObservation, fred, fred.getSeriesObservations, {
 	series_id: "MORTGAGE30US"
-}, 'observations');
+}, 'observations', 'date');
 seriesObservationCopy.clear();
-seriesObservationCopy.sync();
+// seriesObservationCopy.sync();
 
 //
 // sync Releases
@@ -117,16 +119,22 @@ const pathPartials = path.join( __dirname, '../views/partials' );
 // console.log( pathLayouts );
 
 app.set('views', pathViews); // if you don't want to name your templates directory the default "views", then you have to add this line
-app.set('view engine', 'hbs'); // point express to handlebars, a templating engine
 app.engine('hbs', hbs.express4({
 	// extname: '.hbs',
 	defaultLayout: pathLayouts + '/layout.hbs',
 	layoutsDir: pathLayouts,
 	partialsDir: pathPartials
+	// helpers: {
+	// 	json: (context) => JSON.stringify(context) // allows you to use {{{json ...}}} helper in view to print JSON
+	// }
 }));
-
-app.use( express.static( pathPublicDirectory ) ); // this makes the public directory the web root. all pages inside public can now be accessed from the root url
 // hbs.registerPartials( pathPartials ); // point hbs to partials dir
+hbs.registerHelper('json', (context) => JSON.stringify(context));
+
+app.set('view engine', 'hbs'); // point express to handlebars, a templating engine
+app.use( express.static( pathPublicDirectory ) ); // this makes the public directory the web root. all pages inside public can now be accessed from the root url
+
+hbs = extend(hbs);
 
 // 
 // ROUTES 

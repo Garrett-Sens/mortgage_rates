@@ -44,9 +44,8 @@ exports.category_list = (req, res) => {
 
 		// res.send( categories );
 		res.render(
-			'layouts/layout.hbs',
+			'resources',
 			{
-				bodyPartial: 'resources',
 				data: categories,
 				title: 'Categories',
 			}

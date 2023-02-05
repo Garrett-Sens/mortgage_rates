@@ -2,9 +2,13 @@ const express = require('express');
 const router = express.Router();
 
 router.get( '/', function( req, res )
-	{
-		res.redirect('/categories');
-	}
-);
+{
+	res.render(
+		'home',
+		{
+			title: 'Home'
+		}
+	);
+});
 
 module.exports = router;

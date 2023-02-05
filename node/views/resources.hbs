@@ -1,0 +1,22 @@
+{{#extend 'links'}}
+
+{{/extend}}
+
+{{#extend 'styles'}}
+<style type='text/css'>
+	
+</style>
+{{/extend}}
+
+{{!-- <h2>Resources</h2> --}}
+<ul>
+{{#each data}}
+	<li><pre>{{@index}}: {{{json this}}}</pre></li>
+	{{!-- {{>resource resource=this}} --}}
+{{/each}}
+</ul>
+{{#extend 'scripts'}}
+<script type='text/javascript'>
+	
+</script>
+{{/extend}}

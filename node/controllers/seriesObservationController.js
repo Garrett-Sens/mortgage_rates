@@ -9,16 +9,15 @@ exports.index = (req, res) => {
 exports.series_observation_list = (req, res) => {
 	Series_Observation.find((err, series_observation) => {
 		if (err) return handleError(err);
-		console.log( series_observation );
+		// console.log( series_observation );
 		// console.log( series_observation[0].name );
 
 		series_observation = series_observation.map(series_observation => series_observation.toJSON()); // handlebars works better with JSON instead of Mongoose objects
 
 		// res.send( series_observation );
 		res.render(
-			'layouts/layout.hbs',
+			'resources',
 			{
-				bodyPartial: 'resources',
 				data: series_observation,
 				title: 'Series Observation',
 			}

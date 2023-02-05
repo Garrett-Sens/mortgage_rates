@@ -16,9 +16,8 @@ exports.series_list = (req, res) => {
 
 		// res.send( series );
 		res.render(
-			'layouts/layout.hbs',
+			'resources',
 			{
-				bodyPartial: 'resources',
 				data: series,
 				title: 'Series',
 			}
