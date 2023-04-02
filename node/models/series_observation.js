@@ -17,6 +17,10 @@ const SeriesSchema = new Schema({
 	value: {
 		type: Number,
 		required: true
+	},
+	series_id: {
+		type: String,
+		required: true
 	}
 });
 

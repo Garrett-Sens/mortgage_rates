@@ -6,56 +6,48 @@
  */
 class FredCopy
 {
-	constructor(Model, fred, fredGetMethod, where = {}, endpoint, primaryKey = 'id')
+	constructor(Model, fred, fredGetMethod, endpoint, primaryKey = 'id')
 	{
 		this.Model = Model;
 		this.fred = fred;
 		this.fredGetMethod = fredGetMethod;
-		this.where = where;
 		this.endpoint = endpoint;
 		this.primaryKey = primaryKey;
+		this.where = {};
 	}
 
 	// sync api to database and database to api
 	sync()
 	{
-		const scope = this; // meaning of "this" changes below
+		const scope = this; // meaning of "this" changes inside "then" below
 		this.getDataMaps().then(function(data)
 		{
 			const apiDataMap = data.api;
 			const databaseDataMap = data.database;
 
 			// console.log(apiDataMap);
-			console.log(Object.keys(apiDataMap).length);
-			// console.log(databaseDataMap.length);
-			console.log(Object.keys(databaseDataMap).length);
+			console.log(Object.keys(apiDataMap).length + " objects in api");
+			console.log(Object.keys(databaseDataMap).length + " objects in database before sync");
 
 			scope.insertUpdateFredData(apiDataMap, databaseDataMap);
 			scope.deleteOldFredData(apiDataMap, databaseDataMap);
+
+			console.log(Object.keys(databaseDataMap).length + " objects in database after sync"); // @todo this seems to be printing before syncing is finished
 		});
 	}
 
 	async getDataMaps()
 	{
-		const scope = this;
-		try {
-			const data = await Promise.all(
-				[
-					this.getApiDataMap(scope.where),
-					this.getDatabaseDataMap()
-				]
-			);
-			return {
-				'api': data[0],
-				'database': data[1]
-			};
-		} catch (err) {
-			console.error(err);
-			if(err.status && err.message) {
-				throw new Error(err.status + ", " + err.message);
-			}
-			throw new Error(err);
-		}
+		const data = await Promise.all(
+			[
+				this.getApiDataMap(),
+				this.getDatabaseDataMap()
+			]
+		);
+		return {
+			'api': data[0],
+			'database': data[1]
+		};
 	}
 
 	// convert api JSON to map
@@ -63,6 +55,7 @@ class FredCopy
 	{
 		const apiDataMap = {};
 		const apiData = await this.getApiData(this.where);
+
 		// console.log(apiData);
 		for(const apiModelData of apiData)
 		{
@@ -97,7 +90,23 @@ class FredCopy
 					return resolve([result]);
 				});
 			}
-		);
+		).then(function(apiData)
+		{
+			return scope.modifyApiData(apiData);
+		}).catch(function(err)
+		{
+			console.error(err);
+			if(err.status && err.message)
+			{
+				throw new Error(err.status + ", " + err.message);
+			}
+			throw new Error(err);
+		});
+	}
+
+	modifyApiData(apiData)
+	{
+		return apiData;
 	}
 
 	// convert database JSON to map
@@ -128,7 +137,15 @@ class FredCopy
 					return resolve(result);
 				});
 			}
-		);
+		).catch(function(err)
+		{
+			console.error(err);
+			if(err.status && err.message)
+			{
+				throw new Error(err.status + ", " + err.message);
+			}
+			throw new Error(err);
+		});
 	}
 
 	// insert new FRED data into Mongo db
@@ -166,7 +183,6 @@ class FredCopy
 			else
 			{
 				Model.create(apiModelData, function(error, apiModel) {
-					// console.log(apiModel);
 					if(error)
 					{
 						scope.handleDatabaseError(error, {
@@ -205,7 +221,6 @@ class FredCopy
 	clear()
 	{
 		const Model = this.Model;
-		console.log(this.where);
 		Model.deleteMany(this.where).then(function(data){
 			console.log("Data deleted"); // Success
 			console.log(data);

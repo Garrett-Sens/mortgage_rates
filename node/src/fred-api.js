@@ -1,13 +1,13 @@
-const Fred = require('fred-api');
+const FredApi = require('fred-api');
 
 if( !process.env.FRED_KEY )
 {
 	throw new Error( "Missing FRED API key" );
 }
 
-const fred = new Fred(process.env.FRED_KEY);
+const fredApi = new FredApi(process.env.FRED_KEY);
 
-if( !fred )
+if( !fredApi )
 {
 	throw new Error( "Not able to connect to FRED API" );
 }
@@ -35,4 +35,4 @@ if( !fred )
 // const url = "https://mortgageapi.zillow.com/getCurrentRates?partnerId=[your partnerId]&queries.1.propertyBucket.location.stateAbbreviation=WA&queries.1.propertyBucket.propertyValue=500000&queries.1.propertyBucket.loanAmount=400000";
 // const url = "https://api.stlouisfed.org/fred/series/observations?series_id=MORTGAGE30US&limit=100&frequency=weth&aggregation_method=avg&observation_start=2022-01-01&observation_end=2022-07-25&api_key=81f55ba49398734ff8d41db450786518";
 
-module.exports = fred;
+module.exports = fredApi;

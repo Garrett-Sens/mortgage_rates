@@ -19,7 +19,7 @@ exports.series_observation_list = (req, res) => {
 			'resources',
 			{
 				data: series_observation,
-				title: 'Series Observation',
+				title: 'Series Observations',
 			}
 		);
 	});

@@ -110,3 +110,6 @@ dist
 
 # hide instructions on how to run the app
 instructions.txt
+
+# hide VS Code Workspace files
+*.code-workspace

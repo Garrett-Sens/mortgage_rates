@@ -20,9 +20,9 @@
 
 'use strict';
 
-const express = require( 'express' );
-const path = require( 'path' ); // file paths
-let hbs = require( 'express-hbs' );
+const express = require('express');
+const path = require('path'); // file paths
+let hbs = require('express-hbs');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv').config();
 let extend = require('handlebars-extend-block');
@@ -58,38 +58,43 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:')); //Bind
 // FRED API
 //
 // require('./sync-categories.js');
-require('./fredCopy').default; // syncs FRED categories with mongo db
+require('./fred-copy').default; // syncs FRED categories with mongo db
 
-const fred = require('./fred'); // local "fred.js" file
-const FredCopy = require('./fredCopy');
+const fredApi = require('./fred-api'); // "./" means "local file"
+const FredCopy = require('./fred-copy');
+const SeriesObservationCopy = require('./series-observation-copy');
 
 //
 // sync Categories
 //
 
 // const Category = require('../models/category');
-// let categoryCopy = new FredCopy(Category, fred, fred.getCategory, {}, 'categories');
+// let categoryCopy = new FredCopy(Category, fredApi, fredApi.getCategory, 'categories');
 // categoryCopy.clear();
 // categoryCopy.sync();
 
 // const CategoryChild = require('../models/category_child');
-// let categoryChildCopy = new FredCopy(CategoryChild, fred, fred.getCategoryChildren, 'categories');
+// let categoryChildCopy = new FredCopy(CategoryChild, fredApi, fredApi.getCategoryChildren, 'categories');
 // categoryChildCopy.clear();
 // categoryChildCopy.sync();
 
 // const Series = require('../models/series');
-// let seriesCopy = new FredCopy(Series, fred, fred.getSeries, {
+// let seriesCopy = new FredCopy(Series, fredApi, fredApi.getSeries, {
 // 	series_id: "MORTGAGE30US"
 // }, 'seriess');
 // seriesCopy.sync();
 
-// @todo there are supposed to be hundreds but only 20 show up?
 const SeriesObservation = require('../models/series_observation');
-let seriesObservationCopy = new FredCopy(SeriesObservation, fred, fred.getSeriesObservations, {
-	series_id: "MORTGAGE30US"
-}, 'observations', 'date');
+let seriesObservationCopy = new SeriesObservationCopy(
+	SeriesObservation, // Model
+	fredApi, // FRED library instance
+	fredApi.getSeriesObservations, // fredGetMethod
+	'observations', // api endpoint
+	'date', // primaryKey
+	'MORTGAGE30US' // series_id
+);
 seriesObservationCopy.clear();
-// seriesObservationCopy.sync();
+seriesObservationCopy.sync();
 
 //
 // sync Releases

@@ -23,6 +23,8 @@ services:
             - "mongodb"
         stdin_open: true
         tty: true
+        env_file:
+            - ./node/.env
         # environment:
         #     - POSTGRES_HOSTNAME=db
         #     - LARAVEL_ROOT=/var/www/html
