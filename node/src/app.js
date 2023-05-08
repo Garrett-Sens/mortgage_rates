@@ -62,7 +62,6 @@ require('./fred-copy').default; // syncs FRED categories with mongo db
 
 const fredApi = require('./fred-api'); // "./" means "local file"
 const FredCopy = require('./fred-copy');
-const SeriesObservationCopy = require('./series-observation-copy');
 
 //
 // sync Categories
@@ -84,17 +83,18 @@ const SeriesObservationCopy = require('./series-observation-copy');
 // }, 'seriess');
 // seriesCopy.sync();
 
-const SeriesObservation = require('../models/series_observation');
-let seriesObservationCopy = new SeriesObservationCopy(
-	SeriesObservation, // Model
-	fredApi, // FRED library instance
-	fredApi.getSeriesObservations, // fredGetMethod
-	'observations', // api endpoint
-	'date', // primaryKey
-	'MORTGAGE30US' // series_id
-);
-seriesObservationCopy.clear();
-seriesObservationCopy.sync();
+// const SeriesObservationCopy = require('./series-observation-copy');
+// const SeriesObservation = require('../models/series_observation');
+// let seriesObservationCopy = new SeriesObservationCopy(
+// 	SeriesObservation, // Model
+// 	fredApi, // FRED library instance
+// 	fredApi.getSeriesObservations, // fredGetMethod
+// 	'observations', // api endpoint
+// 	'date', // primaryKey
+// 	'MORTGAGE30US' // series_id
+// );
+// await seriesObservationCopy.clear();
+// await seriesObservationCopy.sync();
 
 //
 // sync Releases

@@ -1,15 +1,15 @@
 /**
  * @class FredCopy
  * @constructor
- * @param {Object} fred An instance of the fred-api class
+ * @param {Object} fredApi An instance of the fred-api class
  * @param {Object} Model The Mongoose schema
  */
 class FredCopy
 {
-	constructor(Model, fred, fredGetMethod, endpoint, primaryKey = 'id')
+	constructor(Model, fredApi, fredGetMethod, endpoint, primaryKey = 'id')
 	{
 		this.Model = Model;
-		this.fred = fred;
+		this.fredApi = fredApi;
 		this.fredGetMethod = fredGetMethod;
 		this.endpoint = endpoint;
 		this.primaryKey = primaryKey;
@@ -17,33 +17,43 @@ class FredCopy
 	}
 
 	// sync api to database and database to api
-	sync()
+	async sync()
 	{
+		console.log("sync: ");
 		const scope = this; // meaning of "this" changes inside "then" below
-		this.getDataMaps().then(function(data)
-		{
-			const apiDataMap = data.api;
-			const databaseDataMap = data.database;
+		let data = await this.getDataMaps();
+		const apiDataMap = data.api;
+		const databaseDataMap = data.database;
+		console.log("sync: " + Object.keys(apiDataMap).length + " objects in api map");
+		console.log("sync: " + Object.keys(databaseDataMap).length + " objects in database map");
+		// console.log(apiDataMap);
+		
+		scope.insertUpdateFredData(apiDataMap, databaseDataMap);
 
-			// console.log(apiDataMap);
-			console.log(Object.keys(apiDataMap).length + " objects in api");
-			console.log(Object.keys(databaseDataMap).length + " objects in database before sync");
+		// const databaseData = await this.getDatabaseData();
+		// console.log(databaseData.length + " objects in database");
 
-			scope.insertUpdateFredData(apiDataMap, databaseDataMap);
-			scope.deleteOldFredData(apiDataMap, databaseDataMap);
+		// databaseDataMap = await scope.getDatabaseDataMap();
+		// console.log(Object.keys(databaseDataMap).length + " objects in database map after insertUpdateFredData");
 
-			console.log(Object.keys(databaseDataMap).length + " objects in database after sync"); // @todo this seems to be printing before syncing is finished
-		});
+		// scope.deleteOldFredData(apiDataMap, databaseDataMap);
+
+		// databaseDataMap = scope.getDatabaseDataMap();
+		// console.log(Object.keys(databaseDataMap).length + " objects in database map after deleteOldFredData");
+
+		// console.log(Object.keys(databaseDataMap).length + " objects in database map after sync"); // @todo this seems to be printing before syncing is finished
 	}
 
 	async getDataMaps()
 	{
+		console.log("getDataMaps: ");
 		const data = await Promise.all(
 			[
 				this.getApiDataMap(),
 				this.getDatabaseDataMap()
 			]
 		);
+
 		return {
 			'api': data[0],
 			'database': data[1]
@@ -53,6 +63,7 @@ class FredCopy
 	// convert api JSON to map
 	async getApiDataMap()
 	{
+		console.log("getApiDataMap: ");
 		const apiDataMap = {};
 		const apiData = await this.getApiData(this.where);
 
@@ -67,14 +78,15 @@ class FredCopy
 	}
 
 	// get data for this model from FRED API
-	getApiData(where)
+	async getApiData(where)
 	{
+		console.log("getApiData: ");
 		const scope = this;
 
 		return new Promise(
 			function(resolve, reject)
 			{
-				scope.fredGetMethod.call(scope.fred, where, function(error, result)
+				scope.fredGetMethod.call(scope.fredApi, where, function(error, result)
 				{
 					// console.log(result);
 					if(error)
@@ -82,7 +94,7 @@ class FredCopy
 						return reject(error);
 					}
 
-					if( result[scope.endpoint] )
+					if(result[scope.endpoint])
 					{
 						return resolve(result[scope.endpoint]);
 					}
@@ -112,8 +124,10 @@ class FredCopy
 	// convert database JSON to map
 	async getDatabaseDataMap()
 	{
+		console.log("getDatabaseDataMap: "); // Docker Desktop logs are not in order. Not my fault. 
 		const databaseDataMap = {};
 		const databaseData = await this.getDatabaseData();
+		console.log("getDatabaseDataMap: " + databaseData.length + " objects in database");
 		for(const databaseModelData of databaseData)
 		{
 			databaseDataMap[databaseModelData[this.primaryKey]] = databaseModelData;
@@ -122,8 +136,9 @@ class FredCopy
 	}
 
 	// get database data for this model
-	getDatabaseData()
+	async getDatabaseData()
 	{
+		console.log("getDatabaseData: ");
 		const Model = this.Model;
 
 		return new Promise(
@@ -149,28 +164,45 @@ class FredCopy
 	}
 
 	// insert new FRED data into Mongo db
-	insertUpdateFredData(apiDataMap, databaseDataMap)
+	async insertUpdateFredData(apiDataMap, databaseDataMap)
 	{
+		console.log("insertUpdateFredData: ");
 		const scope = this;
 		const Model = this.Model;
 
 		// iterate over IDs in API data
+		console.log("insertUpdateFredData: " + Object.keys(databaseDataMap).length + " objects in database map before FOR");
+		console.log("insertUpdateFredData: " + Object.keys(apiDataMap).length + " objects in api map before FOR");
+		let i = 1;
 		for(const apiDataId in apiDataMap)
 		{
+			// temp
+			if(i > 100)
+			{
+				break;
+			}
+
+			console.log(apiDataId);
 			if(!apiDataMap.hasOwnProperty(apiDataId))
 			{
+				console.log("Skipping: " + apiDataId);
+				i++;
 				continue;
 			}
 
 			const apiModelData = apiDataMap[apiDataId];
 
+			console.log(apiDataId + " exists in database? " + (apiDataId in databaseDataMap));
+
 			// if the database has data with that ID, then update it
 			if(apiDataId in databaseDataMap)
 			{
+				console.log("Updating: " + apiDataId);
 				Model.updateOne({id: apiDataId}, apiModelData, function(error, apiModel) {
 					// console.log(apiModel);
 					if(error)
 					{
+						console.error(error);
 						scope.handleDatabaseError(error, {
 							'apiDataId': apiDataId,
 							'apiModelData': apiModelData
@@ -182,9 +214,12 @@ class FredCopy
 			// if not, add that data to the database
 			else
 			{
+				console.log("Creating: " + apiDataId);
 				Model.create(apiModelData, function(error, apiModel) {
+					// console.log(apiModel);
 					if(error)
 					{
+						console.error(error);
 						scope.handleDatabaseError(error, {
 							'apiDataId': apiDataId,
 							'apiModelData': apiModelData
@@ -193,12 +228,20 @@ class FredCopy
 					// saved!
 				});
 			}
+
+			i++;
+
+			// temp
+			const databaseData = await this.getDatabaseData();
+			console.log("i: " + i);
+			console.log("getDatabaseDataMap: " + databaseData.length + " objects in database");
 		}
 	}
 
 	// delete Mongo db data that is no longer in FRED
 	deleteOldFredData(apiDataMap, databaseDataMap)
 	{
+		console.log("deleteOldFredData: ");
 		const Model = this.Model;
 
 		// iterate over IDs in database data
@@ -217,16 +260,16 @@ class FredCopy
 		}
 	}
 
-	// delete Mongo db data that is no longer in FRED
-	clear()
+	// delete Mongo db data
+	async clear()
 	{
+		console.log("clear: ");
+		const scope = this;
 		const Model = this.Model;
-		Model.deleteMany(this.where).then(function(data){
-			console.log("Data deleted"); // Success
-			console.log(data);
-		}).catch(function(error){
-			console.log(error); // Failure
-		});
+		let response = await Model.deleteMany(this.where);
+		let databaseDataMap = await scope.getDatabaseDataMap();
+		console.log(Object.keys(databaseDataMap).length + " objects in database map after clear");
+		return response;
 	}
 
 	// delete Mongo db data that is no longer in FRED

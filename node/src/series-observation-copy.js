@@ -3,14 +3,14 @@ const FredCopy = require('./fred-copy');
 /**
  * @class SeriesObservationCopy
  * @constructor
- * @param {Object} fred An instance of the fred-api class
+ * @param {Object} fredApi An instance of the fred-api class
  * @param {Object} Model The Mongoose schema
  */
 class SeriesObservationCopy extends FredCopy
 {
-	constructor(Model, fred, fredGetMethod, endpoint, primaryKey = 'id', series_id)
+	constructor(Model, fredApi, fredGetMethod, endpoint, primaryKey = 'id', series_id)
 	{
-		super(Model, fred, fredGetMethod, endpoint, primaryKey);
+		super(Model, fredApi, fredGetMethod, endpoint, primaryKey);
 		this.series_id = series_id;
 		this.where = {
 			'series_id' : series_id
@@ -26,6 +26,7 @@ class SeriesObservationCopy extends FredCopy
 			apiModelData.series_id = this.series_id;
 			apiDataModified.push(apiModelData);
 		}
+		// console.log(apiDataModified);
 		return apiDataModified;
 	}
 }

@@ -1,4 +1,22 @@
-const Series_Observation = require('../models/series_observation');
+const SeriesObservation = require('../models/series_observation');
+const SeriesObservationCopy = require('../src/series-observation-copy');
+const fredApi = require('../src/fred-api'); // "./" means "local file"
+const FredCopy = require('../src/fred-copy');
+
+// copy this model's data from api into database
+exports.synchronize = async (req, res) => {
+	let seriesObservationCopy = new SeriesObservationCopy(
+		SeriesObservation, // Model
+		fredApi, // FRED library instance
+		fredApi.getSeriesObservations, // fredGetMethod
+		'observations', // api endpoint
+		'date', // primaryKey
+		'MORTGAGE30US' // series_id
+	);
+	await seriesObservationCopy.clear();
+	await seriesObservationCopy.sync();
+	return "series observations synchronized";
+};
 
 // Display Series Observation home page
 exports.index = (req, res) => {
@@ -7,7 +25,7 @@ exports.index = (req, res) => {
 
 // Display list of all Series_Observation.
 exports.series_observation_list = (req, res) => {
-	Series_Observation.find((err, series_observation) => {
+	SeriesObservation.find((err, series_observation) => {
 		if (err) return handleError(err);
 		// console.log( series_observation );
 		// console.log( series_observation[0].name );
@@ -28,7 +46,7 @@ exports.series_observation_list = (req, res) => {
 // Display detail page for a specific Series Observation.
 exports.series_observation_detail = (req, res) => {
 	// res.send(`NOT IMPLEMENTED: Series_Observation detail: ${req.params.id}`);
-	Series_Observation.find({ id: req.params.id }, "id name parentId", (err, series_observation) => {
+	SeriesObservation.find({ id: req.params.id }, "id name parentId", (err, series_observation) => {
 		if (err) return handleError(err);
 		// 'series_observation' contains the list of athletes that match the criteria.
 		console.log( series_observation );

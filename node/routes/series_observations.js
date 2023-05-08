@@ -5,6 +5,9 @@ const seriesObservationController = require('../controllers/seriesObservationCon
 // GET series_observation home page.
 // router.get('/', seriesObservationController.index);
 
+// GET request for running sync between FRED api and database
+router.get('/synchronize', seriesObservationController.synchronize);
+
 // GET request for creating a Release. NOTE This must come before routes that display Release (uses id).
 router.get('/create', seriesObservationController.series_observation_create_get);
 
@@ -28,5 +31,7 @@ router.get('/:id', seriesObservationController.series_observation_detail);
 
 // GET request for list of all Release items.
 router.get('/', seriesObservationController.series_observation_list);
+
+
 
 module.exports = router;
