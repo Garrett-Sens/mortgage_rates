@@ -2,7 +2,7 @@
  * @class FredCopy
  * @constructor
  * @param {Object} fredApi An instance of the fred-api class
- * @param {Object} Model The Mongoose schema
+ * @param {Object} Model The Mongoose model
  */
 class FredCopy
 {
@@ -22,26 +22,29 @@ class FredCopy
 		console.log("sync: ");
 		const scope = this; // meaning of "this" changes inside "then" below
 		let data = await this.getDataMaps();
-		const apiDataMap = data.api;
-		const databaseDataMap = data.database;
+		let apiDataMap = data.api;
+		let databaseDataMap = data.database;
 		console.log("sync: " + Object.keys(apiDataMap).length + " objects in api map");
 		console.log("sync: " + Object.keys(databaseDataMap).length + " objects in database map");
 		// console.log(apiDataMap);
 		
 		scope.insertUpdateFredData(apiDataMap, databaseDataMap);
 
-		// const databaseData = await this.getDatabaseData();
-		// console.log(databaseData.length + " objects in database");
+		const delay = ms => new Promise(res => setTimeout(res, ms));
+		await delay(10000); // give database some time to finish creating record
 
-		// databaseDataMap = await scope.getDatabaseDataMap();
-		// console.log(Object.keys(databaseDataMap).length + " objects in database map after insertUpdateFredData");
+		const databaseData = await this.getDatabaseData();
+		console.log(databaseData.length + " objects in database");
+
+		databaseDataMap = await scope.getDatabaseDataMap();
+		console.log(Object.keys(databaseDataMap).length + " objects in database map after insertUpdateFredData");
 
 		// scope.deleteOldFredData(apiDataMap, databaseDataMap);
 
 		// databaseDataMap = scope.getDatabaseDataMap();
 		// console.log(Object.keys(databaseDataMap).length + " objects in database map after deleteOldFredData");
 
-		// console.log(Object.keys(databaseDataMap).length + " objects in database map after sync"); // @todo this seems to be printing before syncing is finished
+		console.log(Object.keys(databaseDataMap).length + " objects in database map after sync"); // @todo this seems to be printing before syncing is finished
 	}
 
 	async getDataMaps()
@@ -176,28 +179,29 @@ class FredCopy
 		let i = 1;
 		for(const apiDataId in apiDataMap)
 		{
+			// console.log("i: " + i);
 			// temp
-			if(i > 100)
-			{
-				break;
-			}
+			// if(i > 100)
+			// {
+			// 	break;
+			// }
 
-			console.log(apiDataId);
+			// console.log(apiDataId);
 			if(!apiDataMap.hasOwnProperty(apiDataId))
 			{
-				console.log("Skipping: " + apiDataId);
+				// console.log("Skipping: " + apiDataId);
 				i++;
 				continue;
 			}
 
 			const apiModelData = apiDataMap[apiDataId];
 
-			console.log(apiDataId + " exists in database? " + (apiDataId in databaseDataMap));
+			// console.log(apiDataId + " exists in database? " + (apiDataId in databaseDataMap));
 
 			// if the database has data with that ID, then update it
 			if(apiDataId in databaseDataMap)
 			{
-				console.log("Updating: " + apiDataId);
+				// console.log("Updating: " + apiDataId);
 				Model.updateOne({id: apiDataId}, apiModelData, function(error, apiModel) {
 					// console.log(apiModel);
 					if(error)
@@ -214,12 +218,12 @@ class FredCopy
 			// if not, add that data to the database
 			else
 			{
-				console.log("Creating: " + apiDataId);
+				// console.log("Creating: " + apiDataId);
 				Model.create(apiModelData, function(error, apiModel) {
 					// console.log(apiModel);
 					if(error)
 					{
-						console.error(error);
+						// console.error(error);
 						scope.handleDatabaseError(error, {
 							'apiDataId': apiDataId,
 							'apiModelData': apiModelData
@@ -232,9 +236,11 @@ class FredCopy
 			i++;
 
 			// temp
-			const databaseData = await this.getDatabaseData();
-			console.log("i: " + i);
-			console.log("getDatabaseDataMap: " + databaseData.length + " objects in database");
+			// const delay = ms => new Promise(res => setTimeout(res, ms));
+			// await delay(10); // give database some time to finish creating record
+			// // even though we are creating every object in the for loop, sometimes new objects aren't added below. not sure why.
+			// const databaseData = await this.getDatabaseData();
+			// console.log("getDatabaseDataMap: " + databaseData.length + " objects in database");
 		}
 	}
 

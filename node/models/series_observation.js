@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const SeriesSchema = new Schema({
+const SeriesObservationSchema = new Schema({
 	realtime_start: {
 		type: Date,
 		required: true
@@ -24,4 +24,4 @@ const SeriesSchema = new Schema({
 	}
 });
 
-module.exports = mongoose.model("SeriesObservation", SeriesSchema);
+module.exports = mongoose.model("SeriesObservation", SeriesObservationSchema);
